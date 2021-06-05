@@ -12,20 +12,16 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.feature_extraction.text import CountVectorizer
 
-
 df_train = pd.read_csv('C://Users//Root//PycharmProjects//train.csv')
 df_test = pd.read_csv('C://Users//Root//PycharmProjects///test.csv')
 
 df_head_train = df_train.head(n=5)
 print(df_head_train)
-'''df_unique_train = df_train.tare.unique()
+
+df_unique_train = df_train.tare.unique()
 print(df_unique_train)
 print(len(df_unique_train))
-print(len(df_train['name']))'''
-#Задача: мультиклассовая классификация (21 класс), названия не упорядочены - вид товара, марка и
-#фирма-производитель могут иметь разное положение в строке, различный шрифт.
-
-
+print(len(df_train['name']))
 
 sw = stopwords.words('english')
 for i in sw:
@@ -35,27 +31,17 @@ df_train['new_name'] = df_train['new_name'].str.replace(pattern, '')
 df_head_train = df_train.head(n=5)
 print(df_head_train)
 
-
 #определяем тестовую и тренировочную выборки
 features_train, features_test, labels_train, labels_test = train_test_split(df_train['new_name'], df_train['target'], test_size=0.3, random_state=42)
 vectorizer = TfidfVectorizer(sublinear_tf=False)
 features_train_transformed = vectorizer.fit_transform(features_train)
 features_test_transformed = vectorizer.transform(features_test)
 
-
-#В ячейке выше создается матрица tf-idf, при этом vocabulary фиксируется на features_train (поэтому
-#fit_transform), а features_test преобразуется в соответствии с этим словарем
-
-
 n_components = 100
 pca = TruncatedSVD(n_components=n_components, random_state=42, n_iter=10).fit(features_train_transformed)
 
-
-
-
 X_train_pca = pca.transform(features_train_transformed)
 X_test_pca = pca.transform(features_test_transformed)
-
 
 parameters = {'n_estimators':(10, 40, 100), 'criterion':('gini', 'entropy'), 'random_state':[42]}
 first_tree = RandomForestClassifier()
@@ -63,7 +49,6 @@ clf = GridSearchCV(first_tree, parameters)
 clf.fit(X_train_pca, labels_train)
 best_par = clf.best_params_
 print(best_par)
-
 
 #Таким способом было выявлено, что при n_components=100 (для TruncatedSVD) оптимальные параметры
 #случайного леса 'criterion': 'gini', 'n_estimators': 100, 'random_state': 42. При увеличении
